@@ -65,7 +65,7 @@ This repository provides a Django project template with a custom user model. Cus
 ```
 django-custom-user/
 │
-├── myapp/                        # Example Django app
+├── user/                        # Example Django app
 │   ├── migrations/               # Migration files for the app
 │   ├── admin.py                  # Admin customization for custom user model
 │   ├── apps.py                   # App configuration
