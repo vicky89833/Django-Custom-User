@@ -37,7 +37,10 @@ This repository provides a Django project template with a custom user model. Cus
    ```bash
    pip install -r requirements.txt
    ```
-
+   ** In settings.py add these line**
+    ```
+    AUTH_USER_MODEL ='user.NewUser'
+    ```
 4. **Apply migrations:**
 
    ```bash
@@ -164,7 +167,7 @@ The `UserManager` class is responsible for handling the creation of regular user
 
 ```python
 from django.conf import settings
-from myapp.models import User
+from user.models import User
 
 # Create a new user
 user = User.objects.create_user(email='user@example.com', password='password123')
