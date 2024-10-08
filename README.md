@@ -93,35 +93,64 @@ The custom user model is defined in `myapp/models.py` using `AbstractBaseUser` a
 ### Model Overview
 
 ```python
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy
+from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin,BaseUserManager
 
-class UserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
+# Create your models here.
+
+class CustomAccountManager(BaseUserManager):
+    def create_superuser(self, email, user_name ,password,**other_fields):
+    
+        other_fields.setdefault('is_staff',True)
+        other_fields.setdefault('is_superuser',True)
+        other_fields.setdefault('is_active',True)
+        
+        if other_fields.get('is_staff') is not True:
+            raise ValueError(
+                "Superuser must be assigned to is_staff=True."
+            )
+        if other_fields.get('is_superuser') is not True:
+            raise ValueError(
+                "Superuser must be assigned to is_superuser=True."
+            )
+            
+        return self.create_user( email, user_name, password, **other_fields)    
+            
+    
+    def create_user(self,email,user_name ,password,**other_fields):
         if not email:
-            raise ValueError('The Email field must be set')
+            raise ValueError(
+                "You must provide an email address"
+            )
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model( email =email , user_name= user_name,
+                         **other_fields)
         user.set_password(password)
-        user.save(using=self._db)
+        user.save()
         return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        return self.create_user(email, password, **extra_fields)
-
-class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
-    date_of_birth = models.DateField(null=True, blank=True)
-    phone_number = models.CharField(max_length=15, blank=True)
-    is_active = models.BooleanField(default=True)
+        
+        
+        
+        
+        
+            
+class NewUser(AbstractBaseUser, PermissionsMixin):
+    email= models.EmailField(gettext_lazy('email address'), unique=True)
+    user_name = models.CharField(max_length=150,unique=True)
+    start_date= models.DateTimeField(default=timezone.now)
+    about =models.TextField(gettext_lazy('about'), max_length=500, blank=True)
     is_staff = models.BooleanField(default=False)
-
-    objects = UserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['date_of_birth']
+    is_active = models.BooleanField(default =False)
+    
+    objects= CustomAccountManager()
+    USERNAME_FIELD ='email'
+    REQUIRED_FIELDS =['user_name']
+    
+    def __str__(self):
+        return self.user_name
+    
 ```
 
 ## Custom User Manager
@@ -138,10 +167,10 @@ from django.conf import settings
 from myapp.models import User
 
 # Create a new user
-user = User.objects.create_user(email='user@example.com', password='password123', date_of_birth='1990-01-01')
+user = User.objects.create_user(email='user@example.com', password='password123')
 
 # Create a new superuser
-admin = User.objects.create_superuser(email='admin@example.com', password='adminpassword', date_of_birth='1985-05-05')
+admin = User.objects.create_superuser(email='admin@example.com', password='adminpassword')
 ```
 
 ## License
